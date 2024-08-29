@@ -5,10 +5,32 @@ const router = express.Router();
 
 // ========== Public Routes ===========
 
+//GET - Read, return all items
+router.get('/landing', async (req, res) => {
+    try {
+        const items = await Item.find({})
+        .populate('owner')
+        res.status(200).json(items);
+    } catch (error) {
+        res.status(500).json(error);
+    }
+});
 
 // ========= Protected Routes =========
 
 router.use(verifyToken);
+
+//GET - Read, return all items of user
+router.get('/', async (req, res) => {
+    console.log(req.user._id)
+    try {
+        const items = await Item.find({owner: req.user._id})
+        .populate('owner')
+        res.status(200).json(items);
+    } catch (error) {
+        res.status(500).json(error);
+    }
+});
 
 //POST - Create an item route
 router.post('/', async (req, res) => {
@@ -23,16 +45,6 @@ router.post('/', async (req, res) => {
     }
 });
 
-//GET - Read, return all items
-router.get('/', async (req, res) => {
-    try {
-        const items = await Item.find({})
-        .populate('owner')
-        res.status(200).json(items);
-    } catch (error) {
-        res.status(500).json(error);
-    }
-});
 
 //GET - Show item details
 router.get('/:itemId', async (req, res) => {
@@ -73,6 +85,7 @@ router.delete('/:itemId', async (req, res) => {
         }
         const deletedItem = await Item.findByIdAndDelete(req.params.itemId);
         res.status(200).json(deletedItem);
+        console.log(deletedItem)
     } catch(error) {
         res.status(500).json(error);
     }
